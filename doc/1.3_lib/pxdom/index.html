@@ -1,0 +1,756 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <title> pxdom 1.6 documentation </title>
+  
+
+<link rel="stylesheet" type="text/css" href="index.css" media="all">
+</head>
+<body>
+  <h1>pxdom</h1>
+  <div id="subhead">
+    pxdom 1.6 <br>
+    A Python DOM implementation
+  </div>
+  <p id="nav">
+    <a href="http://www.w3.org/DOM/DOMTR#dom3"><span>W3C DOM specs</span></a>
+  </p>
+  <p>
+    pxdom is a W3C DOM Level 3 implementation for XML 1.0/1.1 with/without
+    namespaces, using Python and OMG-style (_get/_set) bindings. All features
+    described in the Core and LS Recommendations are supported, with the
+    following exceptions:
+  </p>
+  <ul>
+    <li> validation; </li>
+    <li> asynchronous LSParsers; </li>
+    <li> name character checking is only completely rigorous for XML 1.1. </li>
+  </ul>
+  <p>
+    pxdom runs on Python 1.5.2 or later, and has been tested up to 2.7. It will
+    not currently run on Python 3. Certain features are dependent on Python version:
+  </p>
+  <ul>
+    <li> for Unicode, Python 1.6 or later is required; </li>
+    <li> using an LSSerializer to write to an HTTP URI requires Python 2.0 or later; </li>
+    <li> Unicode character normalisation options require Python 2.3 or later. </li>
+  </ul>
+
+  <h2> Installation </h2>
+  <p>
+    Copy pxdom.py into any folder in your Python path, for example
+    /usr/lib/python/site-packages or C:\Python26\Lib\site-packages.
+    Pre-compile bytecode version with ‘import pxdom’
+    if necessary.
+  </p>
+  <p>
+    pxdom can also be included and imported as a submodule of another package.
+    This is a good strategy if you wish to distribute a DOM-based application without
+    having to worry about the versions of Python and/or PyXML installed on users’
+    machines; the only dependencies are the standard library string-handling and
+    URL-related modules.
+  </p>
+
+  <h2> Usage </h2>
+  <p>
+    The pxdom module implements the DOMImplementationSource interface
+    from DOM Level 3 Core. So to parse a document from a file, use eg.:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    dom= pxdom.getDOMImplementation('') <br>
+    parser= dom.createLSParser(dom.MODE_SYNCHRONOUS, None) <br>
+    document= parser.parseURI('file:///f|/data/doc.xml')
+  </code></div></blockquote>
+  <p>
+    And to serialise and save a document to a file, try:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    serialiser= document.implementation.createLSSerializer() <br>
+    serialiser.writeToURI(document, 'file:///f|/data/doc.xml') 
+  </code></div></blockquote>
+  <p>
+    These interfaces take URIs; you can convert a local filepath to a URI using the
+    standard library urllib module:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    uri= 'file:'+urllib.pathname2url(path)
+  </code></div></blockquote>
+  <p>
+    Many features of parsing and serialisation can be set using the <code class="py">domConfig</code>
+    objects in <code class="py">LSParser</code> and <code class="py">LSSerializer</code>,
+    as well as creating <code class="py">LSInput</code> and <code class="py">LSOutput</code>
+    objects for more control over the source and destination of these operations.
+    For example to serialise a document explicitly to the Latin-1 encoding:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    output= document.implementation.createLSOutput() <br>
+    output.systemId= 'file:///f|/data/doc.xml' <br>
+    output.encoding= 'utf-8' <br>
+    serialiser= document.implementation.createLSSerializer() <br>
+    serialiser.write(document, output)
+  </code></div></blockquote>
+  <p>
+    For full details on using these standard features, see the
+    <a href="http://www.w3.org/TR/DOM-Level-3-LS"><span>DOM Level3 LS</span></a> specification.
+  </p>
+
+  <h3> Shortcuts </h3>
+  <p>
+    As a slightly less verbose alternative to the W3C standard parser interface,
+    the pxdom module offers the convenience functions
+    <code class="py">parse</code> and <code class="py">parseString</code>,
+    which work like the Python minidom module’s functions of the same names:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    doc= pxdom.parse(r'F:\data\doc.xml') <br>
+    doc= pxdom.parseString('&lt;el attr="val"&gt;content&lt;/el&gt;')
+  </code></div></blockquote>
+  <p>
+    You can also get a quick character-serialization by accessing the <code class="py">pxdomContent</code>
+    property of any node.
+  </p>
+
+  <h3> DOMConfiguration parameters </h3>
+  <p>
+    The result of the parse operation depends on the parameters set on the <code class="py">LSParser.domConfig</code>
+    mapping. By default, in accordance with the DOM specification, all CDATA sections will be
+    replaced with plain text nodes and all bound entity references will be replaced by the
+    contents of the entity referred to. This includes external entity references and the external
+    subset.
+  </p>
+  <p>
+    If you use the <code class="py">parse</code> and <code class="py">parseString</code> functions,
+    pxdom will default the parameter ‘cdata-sections’ to <code class="py">True</code>,
+    allowing CDATA sections to stay in the document, and the parameter ‘pxdom-resolve-resources’
+    to <code class="py">False</code> so external entities and the external subset are left alone.
+    This is to emulate the behaviour of the Python standard library’s minidom module.
+  </p>
+  <p>
+    If you prefer also to receive <code class="py">EntityReference</code>  nodes in your document,
+    set the ‘entities’ parameter to a true value. For example:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    parser= dom.createLSParser(dom.MODE_SYNCHRONOUS, None) <br>
+    parser.domConfig.setParameter('cdata-sections', 1) <br>
+    parser.domConfig.setParameter('entities', 1) <br>
+    doc= parser.parseURI('file:///home/data/doc.xml')
+  </code></div></blockquote>
+  <p>
+    Or, using the <code class="py">parse</code>/<code class="py">parseString</code>
+    shortcut functions, you can pass in an optional dictionary of extra DOMConfiguration
+    parameters to set, like:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    doc= pxdom.parse('file:///home/data/doc.xml', {'entities': 1})
+  </code></div></blockquote>
+  <p>
+    (Of course, this usage would no longer be minidom-compatible.)
+    See the DOM 3 Core and LS specifications for more
+    <code class="py">DOMConfiguration</code> parameters.
+  </p>
+
+  <h2> Extensions </h2>
+  <p>
+    pxdom supports some supplemental non-standard features.
+    Their names are always prefixed with ‘pxdom’ to
+    avoid confusion with the standard.
+  </p>
+
+  <h3> Extra DOMConfiguration parameters </h3>
+  <p>
+    Configuration parameters in DOM Level 3 may affect parsing, serialisation
+    and normalisation operations. pxdom adds a few new parameters not defined
+    in the specification.
+  </p>
+  <p>
+    If you want to set a pxdom extra parameter to a non-default value but still be
+    compatible with any other DOM Level 3 implementation, you can use the
+    <code class="py">DOMConfiguration.canSetParameter</code> method
+    to ensure that the parameter is supported first.
+  </p>
+
+  <h4> pxdom-resolve-resources </h4>
+  <p>
+    Applies to: parsing. Default: True (except with
+    <code class="py">parse</code>/<code class="py">parseString</code> functions).
+  </p>
+  <p>
+    Dictates whether resources external to the document file will be
+    resolved and used. This affects external entities and the DTD external subset.
+  </p>
+  <p>
+    pxdom uses only the SYSTEM identifier in fetching an external resource, so
+    parsing an XHTML document, for example, would make many requests to the
+    W3C server to grab the document type information. This is quite slow. Note
+    also that at the time of writing the DTD referenced by XHTML 1.1 documents
+    has acknowledged bugs in it, which pxdom is unable to parse. (This has been
+    corrected for the forthcoming XHTML Modularization Second Edition specification.)
+  </p>
+  <p>
+    To do something with PUBLIC identifiers, such as supply local copies of DTDs,
+    you would have to provide a standard DOM <code class="py">LSResourceResolver</code>
+    object to the configuration parameter ‘resource-resolver’. Resource
+    resolvers will never be called if ‘pxdom-resolve-resources’ is set to false.
+  </p>
+  <p>
+    When the convenience functions <code class="py">parse</code>
+    and <code class="py">parseString</code> are called,
+    ‘pxdom-resolve-resources’ will be false by default, instead of true,
+    for minidom compatibility. This is also the safest option for parsing simple
+    standalone XML.
+  </p>
+
+  <h4> pxdom-normalize-text </h4>
+  <p>
+    Applies to: normalisation. Default: True.
+  </p>
+  <p>
+    Dictates whether text node normalisation (as performed by  the DOM Level 1
+    Core <code class="py">Node.normalize</code> method) will take place when the DOM Level 3 Core
+    <code class="py">Document.normalizeDocument</code> method is called.
+  </p>
+  <p>
+    By default, matching the DOM specification, text node normalisation does
+    occur, but pxdom allows this to be turned off if unwanted.
+  </p>
+
+  <h4> pxdom-update-entities </h4>
+  <p>
+    Applies to: normalisation. Default: True.
+  </p>
+  <p>
+    Dictates whether entity reference nodes have their content child nodes
+    updated from the declaration stored in the doctype. This may result in
+    descendants with different namespaces when the entity reference has been
+    moved, if the entity contains prefixes whose namespaces are not declared in
+    the entity.
+  </p>
+  <p>
+    By default, matching the DOM specification, entities are updated,
+    but pxdom allows this to be turned off if unwanted.
+  </p>
+
+  <h4> pxdom-reset-identity </h4>
+  <p>
+    Applies to: normalisation. Default: True.
+  </p>
+  <p>
+    Dictates whether attributes should have their user-specified-IDness (as
+    set by the setAttributeId etc. methods) reset to false during document
+    normalisation.
+  </p>
+  <p>
+    By default, matching the DOM specification, this does occur,
+    but pxdom allows this to be turned off if unwanted.
+  </p>
+
+  <h4> pxdom-preserve-base-uri </h4>
+  <p>
+    Applies to: parsing, normalisation, serialisation. Default: True.
+  </p>
+  <p>
+    When enabled, pxdom attempts to preserve the base URI context whenever
+    a node that changes base URI is replaced by its contents. This can happen when
+    an element with an <code class="xml">xml:base</code> attribute is SKIPped
+    by a DOM 3 LS filter, or when an entity reference with a different base URI to its
+    parent is flattened.
+  </p>
+  <p>
+    By default, matching the DOM specification, base URIs are preserved. However,
+    the extra <code class="xml">xml:base</code> attributes added to child elements
+    may be unwanted if you are working with entities (especially external entities)
+    but do not wish to use XML Base, so pxdom allows it to be turned off. If
+    you do so, the DOMError warning ‘pi-base-uri-lost’ will also not be
+    generated.
+  </p>
+
+  <h4> pxdom-assume-element-content </h4>
+  <p>
+    Applies to: parsing, normalisation, serialisation, isElementContentWhitespace.
+    Default: False.
+  </p>
+  <p>
+    In order to support the feature <code class="py">Text.isElementContentWhitespace</code>,
+    pxdom must know the content model of the particular element that contains the text node. Often this is
+    only defined in the DTD external subset, which might have been omitted or not read.
+  </p>
+  <p>
+    Normally, following the XML Information Set specification, pxdom will guess that elements with unknown
+    content models do not contain ‘element content’ — so
+    <code class="py">Text.isElementContentWhitespace</code> will always return
+    <code class="py">False</code> for elements not mentioned in the DOCTYPE internal subset.
+  </p>
+  <p>
+    However, if the DOMConfiguration parameter ‘pxdom-assume-element-content’
+    is True, it will guess that unknown elements <em>do</em> contain element content,
+    and so whitespace nodes inside them <em>will</em> be ‘element content whitespace’
+    (often referred to as ‘ignorable whitespace’).
+  </p>
+  <p>
+    This parameter can be combined with the ‘element-content-whitespace’ parameter
+    to parse an XML file and return a DOM tree containing no superfluous whitespace nodes whatsoever,
+    which can make subsequent processing much simpler:
+  </p>
+  <blockquote class="code"><div><code class="py">
+    parser= dom.createLSParser(dom.MODE_SYNCHRONOUS, None) <br>
+    parser.domConfig.setParameter('element-content-whitespace', 0) <br>
+    parser.domConfig.setParameter('pxdom-assume-element-content', 1) <br>
+    doc= parser.parse('file:///data/foo.xml')
+  </code></div></blockquote>
+
+  <h4> pxdom-html-compatible </h4>
+  <p>
+    Applies to: serialisation. Default: False.
+  </p>
+  <p>
+    Optionally ensures serialisation operations return markup that is as far as possible compatible
+    with legacy HTML parsers. In particular, satisfies XHTML 1.0’s HTML compatibility
+    guidelines C.2, C.3 and C.10.
+  </p>
+
+  <h3> Extra object properties </h3>
+  <h4> Node.pxdomLocation </h4>
+  <p>
+    Read-only property giving a DOM Level 3 DOMLocator object for any Node.
+    If the Node was created by a parsing operation this will reveal the file and
+    row/column number in which the node was found: particularly useful for
+    error-reporting purposes.
+  </p>
+
+  <h4> Node.pxdomContent </h4>
+  <p>
+    A convenience property to get the markup for a node, or replace the node
+    with alternative parsed markup, without having to create a separate
+    <code class="py">LSSerializer</code> or <code class="py">LSParser</code>.
+  </p>
+  <p>
+    All nodes have a readable <code class="py">pxdomContent</code>, but only those at content level are
+    writable (attribute nodes, for instance, are not). The document’s <code class="py">domConfig</code>
+    is used to give parameters for parse and serialise operations invoked by <code class="py">pxdomContent</code>.
+  </p>
+  <p>
+    The value read from pxdomContent is a character string, not a byte string, so it
+    is not suitable for writing directly to a file. Use an <code class="py">LSSerializer</code>
+    to serialise a document to a byte stream.
+  </p>
+  <p>
+    <code class="py">pxdomContent</code> is an extended replacement for the
+    <code class="py">ElementLS.markupContent</code> property that was in earlier
+    Working Drafts of the DOM 3 LS spec.
+  </p>
+
+  <h4> Entity.pxdomAvailable </h4>
+  <p>
+    A flag indicating whether the entity’s replacement content is
+    available in the <code class="py">childNodes</code> property. Internal
+    entities are always available; unparsed external entities never are; for
+    parsed external entities it depends on whether external resources were
+    resolved at parse-time.
+  </p>
+
+  <h4> Entity.pxdomDocumentURI </h4>
+  <p>
+    On external entities, gives the actual URI the entity was read from, after
+    applying the systemId to the baseURI and going through any LSResourceResolver
+    redirection. For internal and unavailable entities this property is null.
+  </p>
+
+  <h4> DocumentType.pxdomElements/Attlists </h4>
+  <p>
+    In addition to <code class="py">entities</code> and <code class="py">notations</code>,
+    pxdom includes <code class="py">NamedNodeMap</code>s in the
+    <code class="py">DocumentType</code> for the other
+    two types of declaration that might occur in the DTD. They can be read to get more
+    information on content models than the DOM Level 3 <code class="py">TypeInfo</code>
+    interface makes available.
+  </p>
+
+  <h3> Extra pxdom node types </h3>
+  <h4> ElementDeclaration </h4>
+  <p>
+    <code class="py">ElementDeclaration</code>s can be obtained from the
+    <code class="py">DocumentType.pxdomElements</code> map. Its
+    <code class="py">nodeName</code> is the element name given in the
+    corresponding DTD <code class="xml">&lt;!ELEMENT&gt;</code>
+    declaration).
+  </p>
+  <p>
+    <code class="py">ElementDeclaration</code> nodes have an integer
+    <code class="py">contentType</code> property with enum keys
+    <code class="py">EMPTY_CONTENT</code>, <code class="py">ANY_CONTENT</code>,
+    <code class="py">MIXED_CONTENT</code> and <code class="py">ELEMENT_CONTENT</code>.
+    In the case of mixed and element content, the <code class="py">elements</code> property
+    gives more information on the child elements allowed.
+  </p>
+
+  <h4> AttributeDeclarationList </h4>
+  <p>
+    <code class="py">AttributeDeclarationList</code>s can be obtained from the
+    <code class="py">DocumentType.pxdomAttlists</code> map. Its
+    nodeName is the name of the element whose attributes it is defining, as
+    given in the <code class="xml">&lt;!ATTLIST&gt;</code> declaration).
+  </p>
+  <p>
+    <code class="py">AttributeListDeclaration</code>s hold a
+    <code class="py">NamedNodeMap</code> in their <code class="py">declarations</code>
+    property, mapping attribute names from the declaration to corresponding
+    <code class="py">AttributeDeclaration</code> nodes.
+  </p>
+
+  <h4> AttributeDeclaration </h4>
+  <p>
+    <code class="py">AttributeDeclaration</code> nodes have an integer
+    <code class="py">attributeType</code> property with enum keys <code class="py">ID_ATTR</code>,
+    <code class="py">IDREF_ATTR</code>, <code class="py">IDREFS_ATTR</code>,
+    <code class="py">ENTITY_ATTR</code>, <code class="py">ENTITIES_ATTR</code>,
+    <code class="py">NMTOKEN_ATTR</code>, <code class="py">NMTOKENS_ATTR</code>,
+    <code class="py">NOTATION_ATTR</code>, <code class="py">CDATA_ATTR</code> and
+    <code class="py">ENUMERATION_ATTR</code>.
+  </p>
+  <p>
+    In the case of enumeration and notation attribute types, the <code class="py">typeValues</code>
+    property holds a list of possible string values. There is also an integer <code class="py">defaultType</code>
+    property with enum keys <code class="py">REQUIRED_VALUE</code>,<code class="py"> IMPLIED_VALUE</code>,
+    <code class="py">DEFAULT_VALUE</code> and <code class="py">FIXED_VALUE</code>.
+    In the case of fixed and defaulting attributes, the <code class="py">childNodes</code>
+    property holds any text and/or entity reference nodes that make up the default value.
+  </p>
+
+  <h2 id="changes"> Changelog </h2>
+  <h3> Updates from 1.5 to 1.6 </h3>
+  <ul>
+    <li>
+      On parsing a mismatched end-tag, try to provide useful information on location of start
+      tag, when known, to aid debugging well-formedness problems.
+    </li>
+    <li>
+      Fixed broken canonical-form code including serialisation of U+2028 whitespace character in
+      attribute values.
+    </li>
+  </ul>
+
+  <h3> Updates from 1.4 to 1.5 </h3>
+  <ul>
+    <li>
+      Allow a DOCTYPE declaration to be parsed for a non-namespace-well-formed root
+      element name, when the 'namespaces' DOMConfiguration parameter is turned off
+      in the parser. (Hat tip: Geoffrey Sneddon)
+    </li>
+    <li>
+      Defer DOM Level 3 UserDataHandler callbacks until the end of a deep clone/import/adopt
+      operation, to ensure the related nodes are in the expected final state. (Hat tip: Anjan Samanta.)
+    </li>
+    <li>
+      Element content parser made non-recursive. In theory this allows a document with
+      elements nested a thousand levels deep to be parsed without causing a Python
+      RecursionError. However, trees of this depth may still cause RecursionErrors when
+      dealt with using other recursive algorithms (such as normalisation and serialisation).
+      The main rationale behind making it work for parsing is to ensure a more useful error is
+      generated when trying to parse a long, non-well-formed document that habitually leaves
+      its elements open.
+    </li>
+  </ul>
+
+  
+  <h3> Updates from 1.3 to 1.4 </h3>
+  <ul>
+    <li>
+      Restored Python 1.5 compatibility by removing string method usage.
+    </li>
+  </ul>
+  <h3> Updates from 1.2 to 1.3 </h3>
+  <ul>
+    <li>
+      Added DOMConfiguration parameter pxdom-html-compatible.
+    </li>
+    <li>
+      Made the (implementation-defined in spec) Document.cloneNode() do the most
+      likely-useful action, namely creating a new Document (and copying child content
+      with new ownerDocument if it is a deep clone).
+    </li>
+    <li>
+      Fixed bug that disallowed resetting of NamedNodeNS prefixes to None.
+    </li>
+    <li>
+      Added specific checks in child-altering methods (appendChild et al) so that they raise
+      an error when a disallowed null is passed instead of letting the operation silently
+      do nothing. Changed order of checks in creating NS-aware nodes so that a more
+      helpful error results from illegal characters.
+    </li>
+    <li>
+      Various alterations to parser and serialiser handling of narrow strings. Try where
+      possible to coerce string to unicode, resulting in more consistent results with
+      unusual character encodings.
+    </li>
+    <li>
+      Parser: fixed bug disallowing DOCTYPE declaration with no publicId, systemId,
+      internal subset or whitespace. Fixed possible denormalised text parsing in entities.
+      Fixed possible parameter entity edge cases (spec is woolly here). Use sets where
+      available (Python 2.3+) for marginal performance improvement.
+    </li>
+    <li>
+      Serialiser: ensured newLine property was consistently used throughout the
+      document. Encoded NEL and Unicode Line Separator characters as character references.
+    </li>
+  </ul>
+
+  <h3> Updates from 1.1 to 1.2 </h3>
+  <ul>
+    <li>
+      Redid entity reference parse/normalise/serialise operations, hopefully resulting in more
+      consistent results in the face of combinations of text node normalisation, NodeFilter SKIPping
+      and baseURI loss.
+    </li>
+    <li>
+      Fixed typo in OutputBuffer causing NameError to be raised instead of UnsupportedEncodingErr
+      with DOMError handling, if an unknown encoding is used (thanks to: Andrew Johnson)
+    </li>
+    <li>
+      Added pxdom-preserve-base-uri parameter to control the baseURI preservation that now
+      also works with element skipping and normalisation. xml:base attributes are now added as
+      non-specified Attrs, similar to default attributes.
+    </li>
+    <li>
+      Redid node name character handling to cope more gracefully with narrow strings and
+      apply the XML 1.1 restrictions on what Unicode characters can be in a node name.
+      (The additional restrictions of XML 1.0 are not enforced, largely because its character
+      model is an insanity). Updated parsing and serialisation of character references to
+      cope with characters outside the Basic Multilingual Plane in ‘narrow’
+      (UTF-16) Python builds.
+    </li>
+    <li>
+      Optimised away an order-N-squared method in LSParser, resulting in
+      faster — though still slow, obv. — parse times for long documents (eg. 10x
+      speedup for the commonly-used test file ot.xml). (Hat tip: Frederik Lundh.)
+    </li>
+    <li>
+      Changed isID property to conform to new interpretation of spec: reading Attr.isID
+      returns True if the attribute has schema-determined-IDness <em>or</em>
+      user-determined-IDness, but setting it (through the setAttributeId etc. methods) only affects the
+      user-determined-IDness; xml:id is interpreted as part of
+      schema-determined-IDness. Added new configuration parameter
+      pxdom-reset-identity to allow the removal of user-determined IDness on
+      normalisation to be disabled.
+    </li>
+    <li>
+      Fixed namespace undeclarations (<code class="xml">xmlns:something=""</code>)
+      causing namespaceURIs to become empty strings instead of unbound/null at parse-time.
+      Fixed namespace fixup to stop extra redundant declarations being added.
+    </li>
+    <li>
+      Fixed stupid DTD-parsing bugs that crept into 1.1 before release without tripping the
+      Test Suite. When pxdom-resolve-resources was False, external general entities could
+      cause errors, and INCLUDE sections were broken.
+    </li>
+    <li>
+      Added trivial repr functions so Nodes are easier to read.
+    </li>
+  </ul>
+
+  <h3> Updates from 1.0 to 1.1 </h3>
+  <ul>
+    <li>
+      Entity parsing rewritten to include external entity/subset support, full checking for
+      parameter entities in the external subset, catching of circular references and fixing
+      treatment of character references in replacement text. Also ensured serialisation
+      and normalisation with ‘entities’ only use replacement content
+      for entities that are bound and available. Added ‘pxdom-update-entities’
+      parameter to disable normalizeDocument entity behaviour.
+    </li>
+    <li>
+      Namespace lookup and handling at parse, serialise and normalisation phases redone to ensure
+      namespaces are correct even when content is filtered out (and also improve parse speed marginally).
+      Following Recommendation, the public lookup methods made ignorant about built-in
+      namespaces.
+    </li>
+    <li>
+      Made parser use the ‘namespaces’ parameter to decide
+      whether to create Level 1 or Level 2 nodes. Added exceptions and DOMErrors
+      for parsing namespace-ill-formed names or normalising/serialising Level 1 nodes
+      at Level 2. (The previous parsing fall-back-to-Level-1 behaviour is now available
+      by using a DOMErrorHandler that asks to continue parsing.)
+    </li>
+    <li>
+      Integrated DOMException, LSException and DOMError into the same class
+      to avoid having to use an extra level of exception wrapping. Made
+      normalizeDocument not throw exceptions connected to fatal DOMErrors
+      (unlike LSParser and LSSerializer). Disallowed XML 1.1 output
+      without prolog.
+    </li>
+    <li>
+      Following change in final Recommendation, made setting ’entities’
+      to false no longer remove the entities map in the doctype, and renamed DOMError
+      ‘cdata-section-splitted’ to ‘cdata-sections-splitted’.
+      Made CDATA splitting use Tim Bray’s suggested method from the Annotated
+      XML specification, instead of creating an unnecessary Text node.
+    </li>
+    <li>
+      Fixed possible spurious exceptions in Node.getFeature and normalizeDocument with
+      check-character-normalization failure, namespace declaration removal and entity removal.
+      Made Node.normalize respect ‘normalize-characters’, but not
+      ‘check-character-normalization’, following Recommendation.
+      Add ‘pxdom-normalize-text’ parameter to disable Level 1-style
+      text node normalisation in normalizeDocument.
+    </li>
+    <li>
+      Added typeInfo.isDerivedFrom method and fixed DERIVED constants following Recommendation
+      (though this is not relevant to a non-schema-validating implementation like pxdom).
+    </li>
+    <li>
+      Serialisation now doesn’t escape tabs in non-Attr text content, and doesn’t
+      allow Attr children to be filtered.
+    </li>
+    <li>
+      Catch case of trying to renameNode to empty string, and trying to use renameNode to
+      make a Level 1 node with non-null namespaceURI. Return the correct type of error on
+      attempt to rename a document.
+    </li>
+    <li>
+      Fixed insertBefore/replaceChild used with the same node for both parameters
+      following discussion on www-dom list, to do the sensible-but-not-required thing
+      instead of throwing an embarrassingly inaccurate exception.
+    </li>
+    <li>
+      Made reading a file with invalid byte sequences fall back to replacement instead of
+      raising UnicodeDecodeError. This should make reading non-Unicode files easier.
+    </li>
+    <li>
+      Redid baseURI to return null for the things the infoset mapping says should be null,
+      and return the right answer for the new external entities. Made parsing without entities
+      add xml:base attributes to elements whose Entity baseURIs are different from the parent,
+      supporting pi-base-not-preserved DOMError too.
+    </li>
+    <li>
+      Following resolution on www-dom list, no longer use Text nodes to represent
+      white space at the Document level. Instead act as if there is always one newline
+      character between each Document child node.
+    </li>
+    <li>
+      Made writing to pxdomContent replace the node, rather than its children, as it
+      should have been all along.
+    </li>
+    <li>
+      Fixed bug where comments are parsed as text when disabled from the configuration.
+      (Yikes! How did the Test Suite miss that one?)
+    </li>
+    <li>
+      Added support for xml:id attributes. XML ID is currently only a Working Draft but it seems
+      so obviously useful it should make it through standardisation.
+    </li>
+  </ul>
+
+  <h3> Updates from 0.9 to 1.0 </h3>
+  <ul>
+    <li>
+      Tracking changes in the new DOM 3 Proposed Recommendations, renamed LS config properties, added
+      LSException, changed default newLine behaviour, removed pxdom prefix from previously-non-standard
+      pxdom-no-input-specified error, allow LS namespace parameters to be set False, changed
+      output filter call order
+    </li>
+    <li> Added support for DOMConfiguration parameters ‘format-pretty-print’ and ‘supported-media-types-only’ </li>
+    <li> Following discussion on www-dom list, changed encoding-to-string to use the string’s native encoding, unless overridden by output.encoding </li>
+    <li> Added extra error checks for cases in the L3 DOM Test Suite </li>
+    <li> Fixed recursive readonlyness of entities, notations, entity references </li>
+    <li> Fixed setting textContent on non-Text-containing nodes </li>
+    <li> Fixed very silly canSetParameter bug causing occasional erroneous return-false </li>
+    <li> Added compareDocumentPosition to public interface, and fixed fault in comparison of non-child nodes </li>
+    <li> Renamed parameterNameList parameterNames and made it return a proper DOM-style List object instead of a Python one </li>
+    <li> Made namespace/prefix lookup results match the reference algorithm more closely </li>
+    <li> Reorganised parse/serialisation, allowing application-side LSInput and LSOutput objects to be used </li>
+    <li> Made isEntityContentWhitespace cope with nodes inside entity references </li>
+    <li> Fixed possibly-incorrect namespaceURI of unprefixed default attributes </li>
+    <li> Fixed baseURI for entity references and doctype </li>
+  </ul>
+
+  <h3> Updates from 0.8 to 0.9 </h3>
+  <ul>
+    <li> Lots of interface alterations and renamings to track changes in the new DOM 3 Candidate Recommendations. </li>
+    <li> Node.pxdomContent replaces ElementLS.markupContent (removed from CR). Other old DocumentLS, ElementLS interfaces removed. </li>
+    <li> Module code rearranged into separate aspects to cut down on some of the ‘monster-class’ readability problems. </li>
+    <li> Serialisation mostly rewritten to conform better to specification, particularly the escaping of characters that can't be reproduced in the current encoding. </li>
+    <li> Normalisation partially rewritten, support for Unicode character normalisation added. </li>
+    <li> Support for DOMConfiguration parameter ‘canonical-form’. </li>
+    <li> Parameter pxdom-resolve-resources added as placeholder for future external entity support .</li>
+    <li> Made PIs with no data part parse and serialise correctly. </li>
+    <li> Many changes to LSFilters, which were a bit broken. </li>
+    <li> Allow multiple attributes with the same namespaceURI and localName (but different prefix) to be parsed. (For support of non-namespace-well-formed docs that use attribute names with colons, and unbound namespaces in entities.) </li>
+    <li> Renamed DocumentType.elements and .attlists to pxdom-prefixed versions, as they are non-standard extensions. </li>
+    <li> Fixed parsing of &lt;!ATTLIST&gt;s with NMTOKENS, IDREF, IDREFS (whoops!). </li>
+    <li> Made attribute value normalization happen in more places it should and fixed entref/charref whitespace-char replacement issues. </li>
+    <li> Fixed normalizeDocument namespace-declarations=false option. </li>
+    <li> Support for ‘well-formed’ parameter, tightened up invalid character checks at DOM level too. </li>
+    <li> Made splitTexting a CDATASection correctly create a new CDATASection node, not text. </li>
+  </ul>
+  <h3> Updates from 0.7 to 0.8 </h3>
+  <ul>
+    <li> Tracking forthcoming changes to spec, getDOMImplementations renamed getDOMImplementationList, isWhitespaceInElementContext method becomes isElementContentWhitespace property, isId method becomes property, DOMLocator.offset becomes byteOffset/utf16Offset (non-functional). </li>
+    <li> Don’t claim to support DOM Core 1.0 — following discussion on www-dom-ts, there is no such feature. </li>
+    <li> Allow getDOMImplementation[List] to be called with no argument, as a shortcut. </li>
+    <li> Allow empty string to be passed in to namespaceURI arguments, meaning same as None. </li>
+    <li> Added NODE_ADOPTED UserDataHandler event, compliance fixes to AdoptNode (ents, default attrs). </li>
+    <li> Added DOMConfig.parameterNameList. </li>
+    <li> Added minidom-style NamedNodeMap dictionary accessors for compatibility (thanks to: Paul Boddie). </li>
+    <li> Implemented element-content-whitespace option, added pxdom-assume-element-content to make it more useful. </li>
+    <li> Refuse to parse invalid &lt; in attribute values (makes finding well-formedness errors easier). </li>
+  </ul>
+  <h3> Updates from 0.6 to 0.7 </h3>
+  <ul>
+    <li> Tracking forthcoming changes to spec, DOMSerialiser.writeURI renamed to writeToURI. </li>
+    <li> Fix typos in Document.isDefaultNamespace and Text.replaceWholeText raising exceptions (oops). </li>
+    <li> Made renameNode and writes to Node.prefix update NodeListByTagName objects correctly. </li>
+    <li> Made ParseError return non-Unicode string for easier debugging. </li>
+  </ul>
+  <h3> Future work </h3>
+  <ul>
+    <li>
+      Consider supporting DOM Level 3 Events and/or Level 2 Traversal/Range
+      (any interest for these?);
+    </li>
+    <li>
+      Consider non-monolithic package distribution option: pxdom being a single
+      module is convenient for distribution but it is getting <em>big</em>.
+    </li>
+  </ul>
+  <p>
+    Additional thanks to all responsible for the DOM Test Suite (which has caught
+    many gotchas in previous pxdom versions, regardless of the bugs I keep filing
+    against it), particularly Curt Arnold (for fixing many of them).
+  </p>
+
+  <h2> Licence (new-BSD-style) </h2>
+  <p>
+    Copyright © 2008, Andrew Clover. All rights reserved.
+  </p>
+  <p>
+    Redistribution and use in source and binary forms, with or without modification,
+    are permitted provided that the following conditions are met:
+  </p>
+  <ul>
+    <li>
+      Redistributions must reproduce the above copyright notice, this
+      list of conditions and the following disclaimer in the documentation and/or
+      other materials provided with the distribution.
+    </li>
+    <li>
+      The name of the copyright holder may not be used to endorse or promote products derived
+      from this software without specific prior written permission.
+    </li>
+  </ul>
+  <p><strong>
+    This software is provided by the copyright holder and contributors “as is”
+    and any express or implied warranties, including, but not limited to, the implied
+    warranties of merchantability and fitness for a particular purpose are
+    disclaimed. In no event shall the copyright owner or contributors be liable for
+    any direct, indirect, incidental, special, exemplary, or consequential damages
+    (including, but not limited to, procurement of substitute goods or services;
+    loss of use, data, or profits; or business interruption) however caused and on
+    any theory of liability, whether in contract, strict liability, or tort
+    (including negligence or otherwise) arising in any way out of the use of this
+    software, even if advised of the possibility of such damage.
+  </strong></p>
+
+
+</body>
+</html>
