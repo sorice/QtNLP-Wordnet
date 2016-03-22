@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'QtNLP_Wornet.ui'
 #
-# Created: Thu Apr  7 12:45:12 2016
+# Created: Mon Apr 11 12:29:59 2016
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,11 +17,12 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(512, 865)
+        MainWindow.resize(533, 875)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+        self.gridLayout_4 = QtGui.QGridLayout(self.centralwidget)
+        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
         self.widget = QtGui.QWidget(self.centralwidget)
-        self.widget.setGeometry(QtCore.QRect(0, 0, 511, 381))
         self.widget.setObjectName(_fromUtf8("widget"))
         self.gridLayout_2 = QtGui.QGridLayout(self.widget)
         self.gridLayout_2.setMargin(0)
@@ -34,6 +35,8 @@ class Ui_MainWindow(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
         self.comboBox = QtGui.QComboBox(self.widget)
+        self.comboBox.setEnabled(True)
+        self.comboBox.setEditable(True)
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
         self.horizontalLayout.addWidget(self.comboBox)
         self.pushButton = QtGui.QPushButton(self.widget)
@@ -42,18 +45,12 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
         self.tableWidget = QtGui.QTableWidget(self.widget)
         self.tableWidget.setObjectName(_fromUtf8("tableWidget"))
-        self.tableWidget.setColumnCount(1)
-        self.tableWidget.setRowCount(1)
-        item = QtGui.QTableWidgetItem()
-        self.tableWidget.setVerticalHeaderItem(0, item)
-        item = QtGui.QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, item)
-        item = QtGui.QTableWidgetItem()
-        self.tableWidget.setItem(0, 0, item)
+        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setRowCount(0)
         self.gridLayout.addWidget(self.tableWidget, 1, 0, 1, 1)
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.widget, 0, 0, 1, 1)
         self.widget_2 = QtGui.QWidget(self.centralwidget)
-        self.widget_2.setGeometry(QtCore.QRect(0, 390, 511, 431))
         self.widget_2.setObjectName(_fromUtf8("widget_2"))
         self.gridLayout_3 = QtGui.QGridLayout(self.widget_2)
         self.gridLayout_3.setMargin(0)
@@ -106,9 +103,10 @@ class Ui_MainWindow(object):
         self.listWidget.setObjectName(_fromUtf8("listWidget"))
         self.horizontalLayout_2.addWidget(self.listWidget)
         self.gridLayout_3.addLayout(self.horizontalLayout_2, 0, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.widget_2, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 512, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 533, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -122,15 +120,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "QtNLP_Wordnet", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Busqueda:", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
-        item = self.tableWidget.verticalHeaderItem(0)
-        item.setText(QtGui.QApplication.translate("MainWindow", "New Row", None, QtGui.QApplication.UnicodeUTF8))
-        item = self.tableWidget.horizontalHeaderItem(0)
-        item.setText(QtGui.QApplication.translate("MainWindow", "sense_num", None, QtGui.QApplication.UnicodeUTF8))
-        __sortingEnabled = self.tableWidget.isSortingEnabled()
-        self.tableWidget.setSortingEnabled(False)
-        item = self.tableWidget.item(0, 0)
-        item.setText(QtGui.QApplication.translate("MainWindow", "1", None, QtGui.QApplication.UnicodeUTF8))
-        self.tableWidget.setSortingEnabled(__sortingEnabled)
         self.pushButton_2.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_3.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_4.setText(QtGui.QApplication.translate("MainWindow", "PushButton", None, QtGui.QApplication.UnicodeUTF8))
