@@ -1,0 +1,13 @@
+*.pyc
+*~
+/texto/src
+/texto/susp
+/.project
+*.orig
+*.*#
+*.bak
+*.gz
+*.directory
+*.m
+*.sh
+/data/wordnet
