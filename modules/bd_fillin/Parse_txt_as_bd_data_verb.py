@@ -45,8 +45,13 @@ class ParseDataVerb():
               self.__cant_pointers += 1
 
           all_words = palabra[0:words]
-          #self.__cursor.execute("INSERT OR REPLACE INTO [data_adv] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [f_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,?,'not','not','not',?,'not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss[0:gloss.find(";")], gloss[gloss.find(";")+2:gloss.__len__()]))
-          self.__cursor.execute("INSERT OR REPLACE INTO [data_verb] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [f_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,'not',?,'not','not','not',?,'not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss[0:gloss.find(";")], gloss[gloss.find(";")+2:gloss.__len__()]))
+
+          if(gloss.find('; "') != -1):
+           self.__cursor.execute("INSERT OR REPLACE INTO [data_verb] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [f_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,'not',?,'not','not','not',?,'not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss[0:gloss.find('; "')], gloss[gloss.find('; "')+2:gloss.__len__()]))
+          else:
+           self.__cursor.execute("INSERT OR REPLACE INTO [data_verb] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [f_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,'not',?,'not','not','not','not','not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss))
+
+
           all_pointers = palabra[words+5:palabra.__len__()]
           #print all_words
           while(cant_words > 1):

@@ -45,7 +45,11 @@ class ParseDataAdj():
               self.__cant_pointers += 1
 
           all_words = palabra[0:words]
-          self.__cursor.execute("INSERT OR REPLACE INTO [data_adj] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,?,'not','not','not',?,'not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss[0:gloss.find(";")], gloss[gloss.find(";")+2:gloss.__len__()]))
+
+          if(gloss.find('; "') != -1):
+           self.__cursor.execute("INSERT OR REPLACE INTO [data_adj] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,?,'not','not','not',?,'not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss[0:gloss.find('; "')], gloss[gloss.find('; "')+2:gloss.__len__()]))
+          else:
+           self.__cursor.execute("INSERT OR REPLACE INTO [data_adj] ([synset_offset], [lex_filenum], [ss_type], [w_cnt], [p_cnt], [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es]) VALUES (?,?,?,?,?,?,'not','not','not','not','not') ", (linea[0:8], linea[9:11], linea[12:13], linea[14:16], w_aux+str(self.__cant_pointers), gloss))
 
           all_pointers = palabra[words+5:palabra.__len__()]
           #print all_words
@@ -65,13 +69,6 @@ class ParseDataAdj():
             all_pointers = all_pointers[all_pointers.find(" ")+17:all_pointers.__len__()]
             self.__cant_pointers -= 1
 
-          if(all_pointers.__len__()!= 0):
-              cant_frames = int(all_pointers[0:all_pointers.find(" ")])
-              all_pointers = all_pointers[all_pointers.find(" ")+1:all_pointers.__len__()]
-              while(cant_frames > 0):
-                # print all_pointers[0:1]+"-"+all_pointers[2:4]+"-"+all_pointers[5:7]
-                 all_pointers = all_pointers[8:all_pointers.__len__()]
-                 cant_frames -= 1
           words = 0
           self.__cant_pointers= 0
 
