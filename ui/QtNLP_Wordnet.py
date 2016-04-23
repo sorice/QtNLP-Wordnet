@@ -148,27 +148,24 @@ class Wordnet( QMainWindow, Ui_MainWindow):
             str = "SELECT DISTINCT([data_noun_word_lex_id].[word]) FROM ([index_sense] INNER JOIN [data_noun_word_lex_id] USING([synset_offset])) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"'"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
-            if not result:
-                print
-            else:
+
+            if  result:
              for w in result:
                if(self.comboBox.currentText().toLower()!=lower(w[0])):
                 self.listWidget.addItem(w[0])
             str = "SELECT DISTINCT([data_verb_word_lex_id].[word]) FROM ([index_sense] INNER JOIN [data_verb_word_lex_id] USING([synset_offset])) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"'"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
-            if not result:
-                 print
-            else:
+
+            if result:
              for w in result:
                  if(self.comboBox.currentText().toLower()!=lower(w[0])):
                     self.listWidget.addItem(w[0])
             str = "SELECT DISTINCT([data_adj_word_lex_id].[word]) FROM ([index_sense] INNER JOIN [data_adj_word_lex_id] USING([synset_offset])) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"'"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
-            if not result:
-                 print
-            else:
+
+            if result:
                 for w in result:
                   if(self.comboBox.currentText().toLower()!=lower(w[0])):
                     self.listWidget.addItem(str(w[0]))
@@ -183,6 +180,7 @@ class Wordnet( QMainWindow, Ui_MainWindow):
 
     def insertAntonyms(self):
             self.listWidget.clear()
+
             str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"'AND [data_noun_ptr].[pointer_symbol]='!'"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
@@ -226,3 +224,37 @@ class Wordnet( QMainWindow, Ui_MainWindow):
                   data = self.__cursor.fetchall()
                   for a in data:
                         self.listWidget.addItem(a[0])
+
+
+
+
+
+
+            #print self.comboBox.currentText()
+            #str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]=(SELECT DISTINCT([data_noun_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"' AND [data_noun_ptr].[pointer_symbol]='!')"
+            #self.__cursor.execute(unicode(str))
+            #result = self.__cursor.fetchall()
+            #if result:
+            #    for w in result:
+            #      self.listWidget.addItem(w[0])
+
+            #str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]=(SELECT DISTINCT([data_verb_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"' AND [data_verb_ptr].[pointer_symbol]='!')"
+            #self.__cursor.execute(unicode(str))
+            #result = self.__cursor.fetchall()
+            #if result:
+            #    for w in result:
+            #      self.listWidget.addItem(w[0])
+
+            #str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]=(SELECT DISTINCT([data_adj_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"' AND [data_adj_ptr].[pointer_symbol]='!')"
+            #self.__cursor.execute(unicode(str))
+            #result = self.__cursor.fetchall()
+            #if result:
+            #    for w in result:
+            #      self.listWidget.addItem(w[0])
+
+            #str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]=(SELECT DISTINCT([data_adv_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox.currentText()+"' AND [data_adv_ptr].[pointer_symbol]='!')"
+            #self.__cursor.execute(unicode(str))
+            #result = self.__cursor.fetchall()
+            #if result:
+            #    for w in result:
+            #      self.listWidget.addItem(w[0])
