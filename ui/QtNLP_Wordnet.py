@@ -282,10 +282,12 @@ class WordnetEdit( QMainWindow, df):
         self.__filasel = []
         self.__filword = []
         self.__allsynon = []
+        self.__allsynondown = []
 
         self.__max_row1 = 0
         self.__row1 = 0
         self.__column1 = 1
+        self.__row = 0
 
         self.__max_row2 = 0
         self.__row2 = 0
@@ -537,24 +539,28 @@ class WordnetEdit( QMainWindow, df):
 
     def Cargar(self):
           self.textEdit.setText(self.__bbook[self.listWidget_3.currentRow()].replace("\n\n",""))
+          pos = self.textEdit.find(" "+self.lineEdit_3.text()+" ")
+          self.pintar(pos,pos+len(self.lineEdit_3.text()))
+
     def actualizarbook(self):
           self.listWidget_3.clear()
           self.textEdit.clear()
           self.__bbook = []
     def seleccionar(self):
         self.__filasel = []
-        row = self.tableWidget_2.currentRow()
+        self.__row = self.tableWidget_2.currentRow()
 
-        self.__filasel.append(self.tableWidget_2.takeItem(row,0))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,1))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,2))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,3))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,4))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,5))
-        self.__filasel.append(self.tableWidget_2.takeItem(row,6))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,0))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,1))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,2))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,3))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,4))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,5))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,6))
 
         self.actualizar2()
         self.insertRow2()
+        self.insertSynonyms2()
 
     def upsense(self):
        if(self.__filasel.__len__() != 0):
@@ -570,6 +576,10 @@ class WordnetEdit( QMainWindow, df):
         self.__max_row1 += 1
 
         self.__filasel = []
+        print self.__allsynondown[self.__row]
+        select = self.__allsynondown[self.__row]
+        self.__allsynon.append(select)
+        print self.__allsynon[7]
 
     def insertSynonyms(self):
 
@@ -623,6 +633,9 @@ class WordnetEdit( QMainWindow, df):
 
         self.listWidget.clear()
         row = self.tableWidget.currentRow()
+        print self.__allsynon[self.__allsynon.__len__()-1]
+        print row
+        print  self.__allsynon[7]
         for w in self.__allsynon[row]:
          self.listWidget.addItem(w[0])
 
@@ -689,6 +702,58 @@ class WordnetEdit( QMainWindow, df):
         self.__rowselection = -1
         self.pushButton_7.setText("Insertar")
 
+    def pintar( self, pi,pf):
+        format = QTextCharFormat()
+        format.setBackground(QBrush(Qt.darkRed))
+        cursor = self.textEdit.textCursor()
+        cursor.setPosition(pi)
+        cursor.setPosition(pf, QTextCursor.KeepAnchor)
+        cursor.mergeCharFormat(format)
+        cursor.clearSelection()
+
+    def insertSynonyms2(self):
+
+            str = "SELECT [synset_offset] FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"'"
+            self.__cursor.execute(unicode(str))
+            result = self.__cursor.fetchall()
+
+            if  result:
+             for w in result:
+                 str = "SELECT [word] FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                 self.__cursor.execute(unicode(str))
+                 data = self.__cursor.fetchall()
+                 if  data:
+                  for r in data:
+                      self.__filword.append(r)
+                  self.__allsynondown.append(self.__filword)
+                  self.__filword = []
+
+                 str = "SELECT [word] FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                 self.__cursor.execute(unicode(str))
+                 data = self.__cursor.fetchall()
+                 if  data:
+                  for r in data:
+                      self.__filword.append(r)
+                  self.__allsynondown.append(self.__filword)
+                  self.__filword = []
+
+                 str = "SELECT [word] FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                 self.__cursor.execute(unicode(str))
+                 data = self.__cursor.fetchall()
+                 if  data:
+                  for r in data:
+                      self.__filword.append(r)
+                  self.__allsynondown.append(self.__filword)
+                  self.__filword = []
+
+                 str = "SELECT [word] FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                 self.__cursor.execute(unicode(str))
+                 data = self.__cursor.fetchall()
+                 if  data:
+                  for r in data:
+                      self.__filword.append(r)
+                  self.__allsynondown.append(self.__filword)
+                  self.__filword = []
 
 
 
