@@ -9,9 +9,9 @@ from ui.QtNLP_Wordnet_UI import Ui_MainWindow
 if __name__ == '__main__':
     """Función principal"""
     app = QApplication( sys.argv )
-    w = Wordnet()
-    w.show()
-    #print "asdasd"
+    #w = Wordnet()
+    #w.show()
+
     e = WordnetEdit()
     e.show()
     sys.exit( app.exec_() )
