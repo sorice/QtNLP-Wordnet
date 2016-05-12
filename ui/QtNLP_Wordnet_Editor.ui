@@ -953,7 +953,7 @@
       <item>
        <widget class="QPushButton" name="pushButton_40">
         <property name="text">
-         <string>Insert In de BD</string>
+         <string>Insert In DB</string>
         </property>
        </widget>
       </item>
