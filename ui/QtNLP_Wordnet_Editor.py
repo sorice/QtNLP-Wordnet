@@ -598,6 +598,8 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
          self.insertPartof1()
          self.insertParts1()
 
+         self.findexc()
+
          str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"' ORDER BY [ss_type],[sense_number]"
          self.__cursor.execute(unicode(str))
          result = self.__cursor.fetchall()
@@ -608,7 +610,13 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
 
          for a, b, c, d in result:
             if(a==1):
+                print b
                 self.tableWidget.setItem(self.__row1,0,QTableWidgetItem("noun"))
+                str = "SELECT DISTINCT([word_traslated]) FROM [data_noun_word_lex_id] WHERE [word]='"+self.comboBox_2.currentText()+"' AND [synset_offset]='"+b+"'"
+                self.__cursor.execute(unicode(str))
+                traslated = self.__cursor.fetchall()
+                if(traslated):
+                    self.lineEdit_4.setText(traslated[0][0])
                 str = "SELECT [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es] FROM [data_noun] WHERE [synset_offset]='"+b+"'"
                 self.__cursor.execute(unicode(str))
                 data = self.__cursor.fetchall()
@@ -626,6 +634,11 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
                 self.tableWidget.setItem(self.__row1,self.__column1,QTableWidgetItem(data[0][5]))
             if(a==2):
                 self.tableWidget.setItem(self.__row1,0,QTableWidgetItem("verb"))
+                str = "SELECT DISTINCT([word_traslated]) FROM [data_verb_word_lex_id] WHERE [word]='"+self.comboBox_2.currentText()+"'AND [synset_offset]='"+b+"'"
+                self.__cursor.execute(unicode(str))
+                traslated = self.__cursor.fetchall()
+                if(traslated):
+                    self.lineEdit_4.setText(traslated[0][0])
                 str = "SELECT [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es] FROM [data_verb] WHERE [synset_offset]='"+b+"'"
                 self.__cursor.execute(unicode(str))
                 data = self.__cursor.fetchall()
@@ -643,6 +656,11 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
                 self.tableWidget.setItem(self.__row1,self.__column1,QTableWidgetItem(data[0][5]))
             if(a==3 or a==5):
                 self.tableWidget.setItem(self.__row1,0,QTableWidgetItem("adj"))
+                str = "SELECT DISTINCT([word_traslated]) FROM [data_adj_word_lex_id] WHERE [word]='"+self.comboBox_2.currentText()+"'AND [synset_offset]='"+b+"'"
+                self.__cursor.execute(unicode(str))
+                traslated = self.__cursor.fetchall()
+                if(traslated):
+                    self.lineEdit_4.setText(traslated[0][0])
                 str = "SELECT [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es] FROM [data_adj] WHERE [synset_offset]='"+b+"'"
                 self.__cursor.execute(unicode(str))
                 data = self.__cursor.fetchall()
@@ -659,7 +677,12 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
                 self.__column1 += 1
                 self.tableWidget.setItem(self.__row1,self.__column1,QTableWidgetItem(data[0][5]))
             if(a==4):
-                self.tableWidget.setItem(self.__row1,0,QTableWidgetItem("verb"))
+                self.tableWidget.setItem(self.__row1,0,QTableWidgetItem("adv"))
+                str = "SELECT DISTINCT([word_traslated]) FROM [data_adv_word_lex_id] WHERE [word]='"+self.comboBox_2.currentText()+"'AND [synset_offset]='"+b+"'"
+                self.__cursor.execute(unicode(str))
+                traslated = self.__cursor.fetchall()
+                if(traslated):
+                    self.lineEdit_4.setText(traslated[0][0])
                 str = "SELECT [sense], [sense_es], [sense_long], [sense_long_es], [gloss], [gloss_es] FROM [data_adv] WHERE [synset_offset]='"+b+"'"
                 self.__cursor.execute(unicode(str))
                 data = self.__cursor.fetchall()
@@ -679,6 +702,37 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
             self.__column1 = 1
             self.__row1 += 1
          self.insertSynonyms()
+
+    def findexc(self):
+        str = "SELECT base_form FROM [exceptions] WHERE [word_inflected]='"+self.comboBox_2.currentText()+"'"
+        self.__cursor.execute(unicode(str))
+        resultword = self.__cursor.fetchall()
+
+        if(resultword):
+            str = "SELECT base_form FROM [noun_exc] WHERE [word_inflected]='"+self.comboBox_2.currentText()+"'"
+            self.__cursor.execute(unicode(str))
+            base = self.__cursor.fetchall()
+            if(base):
+                self.listWidget_4.addItem(base[0][0]+" --> noun")
+
+            str = "SELECT base_form FROM [verb_exc] WHERE [word_inflected]='"+self.comboBox_2.currentText()+"'"
+            self.__cursor.execute(unicode(str))
+            base = self.__cursor.fetchall()
+            if(base):
+                self.listWidget_4.addItem(base[0][0]+" --> verb")
+
+            str = "SELECT base_form FROM [adj_exc] WHERE [word_inflected]='"+self.comboBox_2.currentText()+"'"
+            self.__cursor.execute(unicode(str))
+            base = self.__cursor.fetchall()
+            if(base):
+                self.listWidget_4.addItem(base[0][0]+" --> adj")
+
+            str = "SELECT base_form FROM [adv_exc] WHERE [word_inflected]='"+self.comboBox_2.currentText()+"'"
+            self.__cursor.execute(unicode(str))
+            base = self.__cursor.fetchall()
+            if(base):
+                self.listWidget_4.addItem(base[0][0]+" --> adv")
+
 
     def insertRow2(self):
          str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"' ORDER BY [ss_type],[sense_number]"
@@ -1021,11 +1075,14 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
              self.__parts.insert(self.__rowselection,self.lineEdit.text())
             else:
              array = []
-             array1 = []
-             array.append(str(relaword.text()))
-             array1.append(str(self.lineEdit.text()))
-             self.__allsynon[self.__rowarray].insert(self.__rowselection,array1)
-             self.__allsynon[self.__rowarray].append(array)
+             arrayw = [self.lineEdit.text()]
+
+             for wor in self.__allsynon[self.__rowarray]:
+                if(wor!=self.__allsynon[self.__rowarray][self.__rowselection]):
+                    array.append(wor)
+                else:
+                    array.append(arrayw)
+             self.__allsynon[self.__rowarray] = array
             self.__rowselection = -1
         else:
             self.listWidget.addItem(self.lineEdit.text())
@@ -1083,13 +1140,11 @@ class WordnetEdit( QMainWindow, Ui_MainWindow):
             self.__parts.remove(str(welim.text()))
         else:
             array = []
-            array1 = []
-            array.append(self.__allsynon[self.__rowarray])
-            array1.append(array)
-            print array
-            print self.__allsynon.remove(array)
-            #[self.__rowselection]#.remove(str(welim.text())) [self.__rowarray]
 
+            for wor in self.__allsynon[self.__rowarray]:
+                if(wor!=self.__allsynon[self.__rowarray][self.__rowselection]):
+                    array.append(wor)
+            self.__allsynon[self.__rowarray] = array
         self.__rowselection = -1
         self.pushButton_7.setText("Insertar")
 

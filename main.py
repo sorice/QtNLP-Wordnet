@@ -13,6 +13,6 @@ if __name__ == '__main__':
     w = Wordnet()
     w.show()
 
-    e = WordnetEdit()
-    e.show()
+    #e = WordnetEdit()
+    #e.show()
     sys.exit( app.exec_() )

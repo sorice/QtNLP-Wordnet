@@ -14,14 +14,14 @@
    <string>Wordnet-Editor</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_3">
+   <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_17">
+     <layout class="QHBoxLayout" name="horizontalLayout_26">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="label_2">
@@ -38,6 +38,23 @@
                </size>
               </property>
               <property name="text">
+               <string>Traslated:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_4">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
                <string>Search:</string>
               </property>
              </widget>
@@ -46,6 +63,12 @@
              <widget class="QComboBox" name="comboBox_2">
               <property name="enabled">
                <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
               <property name="editable">
                <bool>true</bool>
@@ -67,7 +90,7 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
+          <item>
            <widget class="QTableWidget" name="tableWidget">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -896,7 +919,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_7">
+       <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -930,6 +953,61 @@
         </item>
         <item>
          <widget class="QTextEdit" name="textEdit"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_17">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>word:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_5"/>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox">
+            <item>
+             <property name="text">
+              <string>noun</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>verb</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>adj</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>adv</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_42">
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listWidget_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
