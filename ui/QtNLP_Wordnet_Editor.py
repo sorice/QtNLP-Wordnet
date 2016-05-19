@@ -50,12 +50,12 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__row2 = 0
         self.__column2 = 2
 
-        self.__arrepos = 0
+        self.__arrepos = -1
+        self.__arrepos2 = -1
 
         self.__rowselection = -1
         """cambiar \ por el $ en al bd"""
-        self.__difAtrib = ["[data_noun_ptr].[pointer_symbol]='!'","[data_noun_ptr].[pointer_symbol] = '$'","[data_noun_ptr].[pointer_symbol] = '+' OR [data_noun_ptr].[pointer_symbol] = '^'","[data_noun_ptr].[pointer_symbol] = '='","[data_noun_ptr].[pointer_symbol] = '&'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] = '>'","[data_noun_ptr].[pointer_symbol] = '*'","[data_noun_ptr].[pointer_symbol] like '@%'","[data_noun_ptr].[pointer_symbol] like '~%'","[data_noun_ptr].[pointer_symbol] like '#%'","[data_noun_ptr].[pointer_symbol] = '%m' OR [data_noun_ptr].[pointer_symbol] = '%s' OR [data_noun_ptr].[pointer_symbol] = '%p'"]
-
+        self.__difAtrib = ["[data_noun_ptr].[pointer_symbol]='!'","[data_noun_ptr].[pointer_symbol] = '$'","[data_noun_ptr].[pointer_symbol] = '+' OR [data_noun_ptr].[pointer_symbol] = '^'","[data_noun_ptr].[pointer_symbol] = '='","[data_noun_ptr].[pointer_symbol] = '&'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] = '>'","[data_noun_ptr].[pointer_symbol] = '*'","[data_noun_ptr].[pointer_symbol] like '@%'","[data_noun_ptr].[pointer_symbol] like '~%'","[data_noun_ptr].[pointer_symbol] like '#%'","[data_noun_ptr].[pointer_symbol] = '%m' OR [data_noun_ptr].[pointer_symbol] = '%s' OR [data_noun_ptr].[pointer_symbol] = '%p'"]
 
         self.__antonyms = []
         self.__derivatives = []
@@ -97,7 +97,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.pushButton_25.clicked.connect(self.buscarSynonyms)
         self.pushButton_20.clicked.connect(self.uprelacion)
         self.listWidget.itemDoubleClicked.connect(self.modrelacion)
-        self.pushButton_7.clicked.connect( self.cambrela)
+       # self.pushButton_7.clicked.connect( self.cambrela)
         self.pushButton_22.clicked.connect( self.elim)
 
         self.pushButton_10.clicked.connect( self.insertAntonyms)
@@ -342,6 +342,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
           #aarr = ["as","ds","sf"]
           #print aarr.pop(2)
           #print aarr
+
     def modifexc(self):
         textexc = self.listWidget_4.takeItem(self.listWidget_4.currentRow()).text()
         self.lineEdit_5.setText(textexc[0:textexc.indexOf(" -")])
@@ -443,308 +444,506 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
             aux = []
             array = []
 
-            str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena+")"
+            str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
 
-                for w in result:
+                for w, s in result:
                   aux.append("noun")
-                  aux.append(w[0])
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-
+                  aux.append("0")
                   array.append(aux)
                   aux = []
 
-            str = "SELECT DISTINCT([data_verb_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","verb")+")"
+            str = "SELECT DISTINCT([data_verb_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","verb")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
 
-                for w in result:
+                for w, s in result:
                   aux.append("verb")
-                  aux.append(w[0])
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-
+                  aux.append("0")
                   array.append(aux)
                   aux = []
 
-            str = "SELECT DISTINCT([data_adj_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","adj")+")"
+            str = "SELECT DISTINCT([data_adj_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","adj")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
 
-                for w in result:
+                for w, s in result:
                   aux.append("adj")
-                  aux.append(w[0])
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-
+                  aux.append("0")
                   array.append(aux)
                   aux = []
 
-            str = "SELECT DISTINCT([data_adv_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='" + self.comboBox_2.currentText() + "'AND ("+cadena.replace("noun","adv")+")"
+            str = "SELECT DISTINCT([data_adv_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='" + self.comboBox_2.currentText() + "'AND ("+cadena.replace("noun","adv")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
-                for w in result:
+                for w, s in result:
                   aux.append("adv")
-                  aux.append(w[0])
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
                         aux.append(a[0])
-
+                  aux.append("0")
                   array.append(aux)
 
             return array
 
     def insertAtributo1(self,cadena):
             self.listWidget_2.clear()
+            aux = []
+            array = []
 
-            str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena+")"
+            str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
-                for w in result:
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
 
-            str = "SELECT DISTINCT([data_verb_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena.replace("noun","verb")+")"
+                for w, s in result:
+                  aux.append("noun")
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  aux.append("1")
+                  array.append(aux)
+                  aux = []
+
+            str = "SELECT DISTINCT([data_verb_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena.replace("noun","verb")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
-                for w in result:
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
 
-            str = "SELECT DISTINCT([data_adj_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena.replace("noun","adj")+")"
+                for w, s in result:
+                  aux.append("verb")
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  aux.append("1")
+                  array.append(aux)
+                  aux = []
+
+            str = "SELECT DISTINCT([data_adj_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena.replace("noun","adj")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
-                for w in result:
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
-                  self.__cursor.execute(unicode(str))
-                  data = self.__cursor.fetchall()
-                  if data:
-                   for a in data:
-                        self.listWidget_2.addItem(a[0])
 
-            str = "SELECT DISTINCT([data_adv_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='" +self.lineEdit_2.text()+ "'AND ("+cadena.replace("noun","adv")+")"
+                for w, s in result:
+                  aux.append("adj")
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
+                  self.__cursor.execute(unicode(str))
+                  data = self.__cursor.fetchall()
+                  if data:
+                   for a in data:
+                        aux.append(a[0])
+                  aux.append("1")
+                  array.append(aux)
+                  aux = []
+
+            str = "SELECT DISTINCT([data_adv_ptr].[synset_offset_p]), [synset_offset] FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.lineEdit_2.text()+"'AND ("+cadena.replace("noun","adv")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
-                for w in result:
-                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                for w, s in result:
+                  aux.append("adv")
+                  aux.append(s)
+                  aux.append(w)
+                  str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        self.listWidget_2.addItem(a[0])
-                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
+                        aux.append(a[0])
+                  str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        self.listWidget_2.addItem(a[0])
+                        aux.append(a[0])
+                  aux.append("1")
+                  array.append(aux)
+
+            return array
+
+
+    def insertAntonyms1(self):
+        self.__antonyms = self.insertAtributo(self.__difAtrib[0])
+
+    def insertAntonyms(self):
+        self.__arrepos = 0
+        self.listWidget.clear()
+        for w in self.__antonyms:
+            str = ""
+            aux = 0
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+             self.listWidget.addItem(str[0:len(str)-2])
+
+
 
     def insertAntonyms2(self):
-        self.insertAtributo1(self.__difAtrib[0])
+        self.__arrepos2 = 0
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[0])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertKindof2(self):
-        self.insertAtributo1(self.__difAtrib[9])
+        self.__arrepos2 = 8
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[8])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertKinds2(self):
-        self.insertAtributo1(self.__difAtrib[10])
+        self.__arrepos2 = 9
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[9])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertPartof2(self):
-        self.insertAtributo1(self.__difAtrib[11])
+        self.__arrepos2 = 10
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[10])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertParts2(self):
-        self.insertAtributo1(self.__difAtrib[12])
+        self.__arrepos2 = 11
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[11])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertDomain2(self):
-        self.insertAtributo1(self.__difAtrib[6])
+        self.__arrepos2 = 5
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[5])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertDerivatives2(self):
-        self.insertAtributo1(self.__difAtrib[1])
+        self.__arrepos2 = 1
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[1])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertRelatesto2(self):
-        self.insertAtributo1(self.__difAtrib[2])
+        self.__arrepos2 = 2
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[2])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertAttributes2(self):
-        self.insertAtributo1(self.__difAtrib[3])
+        self.__arrepos2 = 3
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[3])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertSimilar2(self):
-        self.insertAtributo1(self.__difAtrib[4])
+        self.__arrepos2 = 4
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[4])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertCauses2(self):
-        self.insertAtributo1(self.__difAtrib[7])
+        self.__arrepos2 = 6
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[6])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def insertEntails2(self):
-        self.insertAtributo1(self.__difAtrib[8])
+        self.__arrepos2 = 7
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[7])
+
+        for w in array:
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 2):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget_2.addItem(str[0:len(str)-2])
 
     def checkAtributo(self,cadena):
 
@@ -782,15 +981,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__antonyms:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertKindof1(self):
-        self.__kindof = self.insertAtributo(self.__difAtrib[9])
+        self.__kindof = self.insertAtributo(self.__difAtrib[8])
 
 
     def insertKindof(self):
@@ -801,16 +1001,17 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__kindof:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
 
     def insertKinds1(self):
-        self.__kinds = self.insertAtributo(self.__difAtrib[10])
+        self.__kinds = self.insertAtributo(self.__difAtrib[9])
 
 
     def insertKinds(self):
@@ -819,15 +1020,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__kinds:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertPartof1(self):
-        self.__partof = self.insertAtributo(self.__difAtrib[11])
+        self.__partof = self.insertAtributo(self.__difAtrib[10])
 
 
     def insertPartof(self):
@@ -836,15 +1038,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__partof:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertParts1(self):
-        self.__parts = self.insertAtributo(self.__difAtrib[12])
+        self.__parts = self.insertAtributo(self.__difAtrib[11])
 
 
     def insertParts(self):
@@ -853,15 +1056,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__parts:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertDomain1(self):
-        self.__domain = self.insertAtributo(self.__difAtrib[6])
+        self.__domain = self.insertAtributo(self.__difAtrib[5])
 
 
     def insertDomain(self):
@@ -870,12 +1074,13 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__domain:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertDerivatives1(self):
         self.__derivatives = self.insertAtributo(self.__difAtrib[1])
@@ -887,12 +1092,13 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__derivatives:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertAttributes1(self):
         self.__relatesto = self.insertAtributo(self.__difAtrib[3])
@@ -903,12 +1109,13 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__attributes:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertRelatesto1(self):
         self.__relatesto = self.insertAtributo(self.__difAtrib[2])
@@ -919,12 +1126,13 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__relatesto:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertSimilar1(self):
         self.__similar = self.insertAtributo(self.__difAtrib[4])
@@ -936,15 +1144,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__similar:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertCauses1(self):
-        self.__causes = self.insertAtributo(self.__difAtrib[7])
+        self.__causes = self.insertAtributo(self.__difAtrib[6])
 
 
     def insertCauses(self):
@@ -953,15 +1162,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__causes:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def insertEntails1(self):
-        self.__entails = self.insertAtributo(self.__difAtrib[8])
+        self.__entails = self.insertAtributo(self.__difAtrib[7])
 
 
     def insertEntails(self):
@@ -970,12 +1180,13 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__entails:
             str = ""
             aux = 0
-            for a in w:
-              if(aux > 1):
+            if(w[1]==self.__allsynset_offset[self.__rowarray]):
+             for a in w:
+              if(aux > 2):
                str += a+", "
               else:
                aux += 1
-            self.listWidget.addItem(str[0:len(str)-2])
+             self.listWidget.addItem(str[0:len(str)-2])
 
     def actualizar1(self):
         self.__search = False
@@ -1591,29 +1802,34 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         relaword = self.listWidget_2.takeItem(select)
         self.listWidget_2.insertItem(select,relaword)
         self.listWidget.addItem(str(relaword.text()))
-
+        array = []
+        array = self.insertAtributo1(self.__difAtrib[self.__arrepos2])
+        aux = array[select]
+        aux[1]=self.__allsynset_offset[self.__rowarray]
         if(self.__arrepos==0):
-            self.__antonyms.append(str(relaword.text()))
+            self.__antonyms.append(aux)
         elif(self.__arrepos==1):
-            self.__derivatives.append(str(relaword.text()))
+            self.__derivatives.append(aux)
         elif(self.__arrepos==2):
-            self.__relatesto.append(str(relaword.text()))
+            self.__relatesto.append(aux)
+        elif(self.__arrepos==3):
+            self.__attributes.append(aux)
         elif(self.__arrepos==4):
-            self.__similar.append(str(relaword.text()))
+            self.__similar.append(aux)
         elif(self.__arrepos==5):
-            self.__domain.append(str(relaword.text()))
+            self.__domain.append(aux)
         elif(self.__arrepos==6):
-            self.__causes.append(str(relaword.text()))
+            self.__causes.append(aux)
         elif(self.__arrepos==7):
-            self.__entails.append(str(relaword.text()))
+            self.__entails.append(aux)
         elif(self.__arrepos==8):
-            self.__kindof.append(str(relaword.text()))
+            self.__kindof.append(aux)
         elif(self.__arrepos==9):
-            self.__kinds.append(str(relaword.text()))
+            self.__kinds.append(aux)
         elif(self.__arrepos==10):
-            self.__partof.append(str(relaword.text()))
+            self.__partof.append(aux)
         elif(self.__arrepos==11):
-            self.__parts.append(str(relaword.text()))
+            self.__parts.append(aux)
         else:
             array = []
             array.append(str(relaword.text()))
@@ -1621,8 +1837,9 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
 
     def modrelacion(self):
-        self.pushButton_7.setText("Modific")
-        self.__rowselection = self.listWidget.currentRow()
+        if(self.__arrepos==12):
+         self.pushButton_7.setText("Modific")
+         self.__rowselection = self.listWidget.currentRow()
         #self.listWidget.
 
     def cambrela(self):
@@ -1711,30 +1928,45 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
               self.__allsynon[self.__rowarray].append(array)
 
     def elim(self):
-        welim = self.listWidget.takeItem(self.__rowselection)
+        #welim = self.listWidget.takeItem(self.__rowselection)
+        self.listWidget.takeItem(self.__rowselection)
 
         if(self.__arrepos==0):
-            self.__antonyms.remove(str(welim.text()))
+            if(self.__antonyms[self.__rowselection][len(self.__antonyms[self.__rowselection])-1]=="1"):
+               self.__antonyms.pop(self.__rowselection)
         elif(self.__arrepos==1):
-            self.__derivatives.remove(str(welim.text()))
+            if(self.__derivatives[self.__rowselection][len(self.__derivatives[self.__rowselection])-1]=="1"):
+               self.__derivatives.pop(self.__rowselection)
         elif(self.__arrepos==2):
-            self.__relatesto.remove(str(welim.text()))
+            if(self.__relatesto[self.__rowselection][len(self.__relatesto[self.__rowselection])-1]=="1"):
+               self.__relatesto.pop(self.__rowselection)
+        elif(self.__arrepos==3):
+            if(self.__attributes[self.__rowselection][len(self.__attributes[self.__rowselection])-1]=="1"):
+               self.__attributes.pop(self.__rowselection)
         elif(self.__arrepos==4):
-            self.__similar.remove(str(welim.text()))
+            if(self.__similar[self.__rowselection][len(self.__similar[self.__rowselection])-1]=="1"):
+               self.__similar.pop(self.__rowselection)
         elif(self.__arrepos==5):
-            self.__domain.remove(str(welim.text()))
+            if(self.__domain[self.__rowselection][len(self.__domain[self.__rowselection])-1]=="1"):
+               self.__domain.pop(self.__rowselection)
         elif(self.__arrepos==6):
-            self.__causes.remove(str(welim.text()))
+            if(self.__causes[self.__rowselection][len(self.__causes[self.__rowselection])-1]=="1"):
+               self.__causes.pop(self.__rowselection)
         elif(self.__arrepos==7):
-            self.__entails.remove(str(welim.text()))
+            if(self.__entails[self.__rowselection][len(self.__entails[self.__rowselection])-1]=="1"):
+               self.__entails.pop(self.__rowselection)
         elif(self.__arrepos==8):
-            self.__kindof.remove(str(welim.text()))
+            if(self.__kindof[self.__rowselection][len(self.__kindof[self.__rowselection])-1]=="1"):
+               self.__kindof.pop(self.__rowselection)
         elif(self.__arrepos==9):
-            self.__kinds.remove(str(welim.text()))
+            if(self.__kinds[self.__rowselection][len(self.__kinds[self.__rowselection])-1]=="1"):
+               self.__kinds.pop(self.__rowselection)
         elif(self.__arrepos==10):
-            self.__partof.remove(str(welim.text()))
+            if(self.__partof[self.__rowselection][len(self.__partof[self.__rowselection])-1]=="1"):
+               self.__partof.pop(self.__rowselection)
         elif(self.__arrepos==11):
-            self.__parts.remove(str(welim.text()))
+            if(self.__parts[self.__rowselection][len(self.__parts[self.__rowselection])-1]=="1"):
+               self.__parts.pop(self.__rowselection)
         else:
             array = []
 
