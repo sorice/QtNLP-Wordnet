@@ -1,0 +1,18 @@
+Esta carpeta sustituye a la carpeta ¨Información del cliente¨
+
+Información de la tecnología debe contener todos los documentos, materiales, fotos, etc. que le son necesarios a cualquier miembro del equipo para enfrentar la solución propuesta.
+
+Ej: Para elaborar un algoritmo el miembro A del equipo buscó un libro Z, este quedó archivado, y luego puede ser buscado por cualquier miembro. Esto posibilita también que, si no hay Internet el equipo puede superarse o tener suficiente información sobre las tecnologías y el cliente.
+
+Ej: Los módulos de un CMS se bajan por un miembro A del equipo, lo usa, modifica y lo borra. Y luego el miembro B tiene que volver a bajarlo. Con esta estrategia se logra dejar acumulados todas las trazas del camino seguido por los desarrolladores.
+
+Esta carpeta no tiene ningún artefacto. Aquí se pueden guardar datos, papeles que tienen que ver con la empresa, las personas pertenecientes al cliente.
+
+Otros documentos que generalmente te entrega el cliente y que no sabes donde poner.
+
+Información de la tecnología, libros sobre lo que el cliente pidió, o trajo.
+
+Entre otras muchas cosas.
+
+**************************************
+Nota 9 de marzo de 2013 - Las notas anteriores están obsoletas. Gestionar esto en el sistema de Gestión de proyecto, si tiene como. De lo contrario usar esta carpeta o usar un sistema de gestión documental.
