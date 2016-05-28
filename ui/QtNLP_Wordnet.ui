@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>599</width>
+    <width>627</width>
     <height>599</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Busqueda:</string>
+             <string>Search:</string>
             </property>
            </widget>
           </item>
@@ -33,22 +33,63 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="editable">
              <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="searchButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
-             <string>PushButton</string>
+             <string>Search</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Edit</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Minimum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QTableWidget" name="tableWidget">
+         <widget class="QTableWidget" name="synsetList">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>8</horstretch>
@@ -64,6 +105,16 @@
           <property name="gridStyle">
            <enum>Qt::DashDotLine</enum>
           </property>
+          <column>
+           <property name="text">
+            <string>word</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>word_traslated</string>
+           </property>
+          </column>
           <column>
            <property name="text">
             <string>ss_type</string>
@@ -132,49 +183,49 @@
             <item>
              <widget class="QPushButton" name="pushButton_2">
               <property name="text">
-               <string>PushButton</string>
+               <string>Synonyms</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_3">
               <property name="text">
-               <string>PushButton</string>
+               <string>Antonyms</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_4">
               <property name="text">
-               <string>PushButton</string>
+               <string>Derivatives</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_5">
               <property name="text">
-               <string>PushButton</string>
+               <string>Relates to</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_6">
               <property name="text">
-               <string>PushButton</string>
+               <string>Attributes</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_7">
               <property name="text">
-               <string>PushButton</string>
+               <string>Similar</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_8">
               <property name="text">
-               <string>PushButton</string>
+               <string>Domain</string>
               </property>
              </widget>
             </item>
@@ -211,42 +262,42 @@
             <item>
              <widget class="QPushButton" name="pushButton_9">
               <property name="text">
-               <string>PushButton</string>
+               <string>Causes</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_10">
               <property name="text">
-               <string>PushButton</string>
+               <string>Entails</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_11">
               <property name="text">
-               <string>PushButton</string>
+               <string>Kind of</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_12">
               <property name="text">
-               <string>PushButton</string>
+               <string>Kinds</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_13">
               <property name="text">
-               <string>PushButton</string>
+               <string>Part of</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_14">
               <property name="text">
-               <string>PushButton</string>
+               <string>Parts</string>
               </property>
              </widget>
             </item>
@@ -281,7 +332,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>599</width>
+     <width>627</width>
      <height>20</height>
     </rect>
    </property>

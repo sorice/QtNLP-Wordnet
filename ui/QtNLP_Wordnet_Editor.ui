@@ -38,7 +38,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Traslated:</string>
+               <string>Filter:</string>
               </property>
              </widget>
             </item>
@@ -114,6 +114,11 @@
             </column>
             <column>
              <property name="text">
+              <string>word_traslated</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
               <string>sense</string>
              </property>
             </column>
@@ -170,7 +175,7 @@
              </size>
             </property>
             <property name="text">
-             <string>down</string>
+             <string>add</string>
             </property>
            </widget>
           </item>
@@ -264,6 +269,11 @@
             <column>
              <property name="text">
               <string>ss_type</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>word_traslated</string>
              </property>
             </column>
             <column>
@@ -598,19 +608,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_21">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>down</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="pushButton_22">
             <property name="maximumSize">
              <size>
@@ -624,17 +621,17 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_41">
-            <property name="enabled">
-             <bool>false</bool>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <property name="text">
-             <string/>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
             </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -1000,7 +997,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QListWidget" name="listWidget_3">
+         <widget class="QListWidget" name="listWidget_4">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
