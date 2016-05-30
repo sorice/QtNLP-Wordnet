@@ -45,7 +45,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="searchButton">
+           <widget class="QPushButton" name="pushButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -53,12 +53,12 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Search</string>
+             <string>Push</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="editButton">
+           <widget class="QPushButton" name="pushButton_15">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -89,7 +89,7 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QTableWidget" name="synsetList">
+         <widget class="QTableWidget" name="tableWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>8</horstretch>

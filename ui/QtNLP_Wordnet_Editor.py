@@ -7,6 +7,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from QtNLP_Wordnet_Editor_UI import Ui_MainWindow
 import sqlite3
+from __builtin__ import unicode
+
 
 class WordnetEditor( QMainWindow, Ui_MainWindow):
 
@@ -30,9 +32,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__allsynon = []
         self.__allsynondown = []
         self.__allsynset_offset = []
-        self.__allwordsynset = []
         self.__allsynset_offsetdown = []
-        self.__allwordsynsetdown = []
         self.__tablesynset = []
         self.__tablesynsetdown = []
         self.__arrayid = []
@@ -53,8 +53,8 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 0
 
         self.__rowselection = -1
-
-        self.__difAtrib = ["[data_noun_ptr].[pointer_symbol]='!'","[data_noun_ptr].[pointer_symbol] = \'\\'","[data_noun_ptr].[pointer_symbol] = '+' OR [data_noun_ptr].[pointer_symbol] = '^'","[data_noun_ptr].[pointer_symbol] = '='","[data_noun_ptr].[pointer_symbol] = '&'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] = '>'","[data_noun_ptr].[pointer_symbol] = '*'","[data_noun_ptr].[pointer_symbol] like '@%'","[data_noun_ptr].[pointer_symbol] like '~%'","[data_noun_ptr].[pointer_symbol] like '#%'","[data_noun_ptr].[pointer_symbol] = '%m' OR [data_noun_ptr].[pointer_symbol] = '%s' OR [data_noun_ptr].[pointer_symbol] = '%p'"]
+        """cambiar \ por el $ en al bd"""
+        self.__difAtrib = ["[data_noun_ptr].[pointer_symbol]='!'","[data_noun_ptr].[pointer_symbol] = '$'","[data_noun_ptr].[pointer_symbol] = '+' OR [data_noun_ptr].[pointer_symbol] = '^'","[data_noun_ptr].[pointer_symbol] = '='","[data_noun_ptr].[pointer_symbol] = '&'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] like '%c' OR [data_noun_ptr].[pointer_symbol] like '%r' OR [data_noun_ptr].[pointer_symbol] = '%u'","[data_noun_ptr].[pointer_symbol] = '>'","[data_noun_ptr].[pointer_symbol] = '*'","[data_noun_ptr].[pointer_symbol] like '@%'","[data_noun_ptr].[pointer_symbol] like '~%'","[data_noun_ptr].[pointer_symbol] like '#%'","[data_noun_ptr].[pointer_symbol] = '%m' OR [data_noun_ptr].[pointer_symbol] = '%s' OR [data_noun_ptr].[pointer_symbol] = '%p'"]
 
 
         self.__antonyms = []
@@ -70,7 +70,11 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__partof = []
         self.__parts = []
 
-        self.tableWidget.cellChanged.connect(self.modifTable)
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget_2.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        self.pushButton_40.clicked.connect(self.insertmodifinDB)
+        self.tableWidget.cellChanged.connect(self.modiftable)
         self.lineEdit_4.textChanged.connect(self.busqueda)
         self.pushButton_6.clicked.connect(self.elimatrib)
         self.listWidget_4.activated.connect(self.modifexc)
@@ -121,18 +125,136 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.pushButton_32.clicked.connect( self.insertKinds2)
         self.pushButton_34.clicked.connect( self.insertPartof2)
         self.pushButton_36.clicked.connect( self.insertParts2)
+    def cantPointers(self):
+          p_cnt = len(self.__antonyms) + len(self.__derivatives) + len(self.__relatesto) + len(self.__attributes) + len(self.__similar) + len(self.__domain) + len(self.__causes) + len(self.__entails) + len(self.__kindof) + len(self.__kinds) + len(self.__partof) + len(self.__parts)
+
+          if(len(str(p_cnt))==1):
+              p_cnt ="00" + str(p_cnt)
+          if(len(str(p_cnt))==2):
+              p_cnt ="0" + str(p_cnt)
+          return p_cnt
+    def ChangeHex(self,n):
+      x = (n % 16)
+      c = ""
+      if (x < 10):
+        c = x
+      if (x == 10):
+        c = "a"
+      if (x == 11):
+        c = "b"
+      if (x == 12):
+        c = "c"
+      if (x == 13):
+        c = "d"
+      if (x == 14):
+        c = "e"
+      if (x == 15):
+        c = "f"
+
+      if (n - x != 0):
+        return self.ChangeHex(n / 16) + str(c)
+      else:
+        return str(c)
+
+    def insertmodifinDB(self):
+
+        countexc = self.listWidget_4.count()
+
+        self.__cursor.execute(unicode("DELETE FROM [exceptions] WHERE [word_inflected]= '"+self.comboBox_2.currentText()+"'"))
+        self.__cursor.execute(unicode("DELETE FROM [noun_exc] WHERE [word_inflected]= '"+self.comboBox_2.currentText()+"'"))
+        self.__cursor.execute(unicode("DELETE FROM [verb_exc] WHERE [word_inflected]= '"+self.comboBox_2.currentText()+"'"))
+        self.__cursor.execute(unicode("DELETE FROM [adj_exc] WHERE [word_inflected]= '"+self.comboBox_2.currentText()+"'"))
+        self.__cursor.execute(unicode("DELETE FROM [adv_exc] WHERE [word_inflected]= '"+self.comboBox_2.currentText()+"'"))
+
+        if(countexc!=0):
+           while(countexc > 0):
+              wordexc = self.listWidget_4.item(countexc-1).text()
+              self.__cursor.execute(unicode("INSERT OR REPLACE INTO [exceptions] ([word_inflected], [base_form]) VALUES ('"+self.comboBox_2.currentText()+"','"+wordexc[0:wordexc.indexOf(" -")]+"')"))
+              self.__cursor.execute(unicode("INSERT OR REPLACE INTO ["+wordexc[wordexc.indexOf("> ")+2:len(wordexc)]+"_exc] ([word_inflected], [base_form]) VALUES ('"+self.comboBox_2.currentText()+"','"+wordexc[0:wordexc.indexOf(" -")]+"')"))
+              countexc -= 1
+
+        query = "SELECT num FROM [max_synset_offset]"
+        self.__cursor.execute(unicode(query))
+        max = self.__cursor.fetchall()
+        max = int(max[0][0])
+
+        verificword = "SELECT * FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"'"
+        self.__cursor.execute(unicode(verificword))
+        verific = self.__cursor.fetchall()
+
+        if(verific):
+          print "sii"
+          createconsult = "DELETE FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"'"
+          for id in self.__allsynset_offset:
+             createconsult += "AND [synset_offset] !='"+id+"'"
+          self.__cursor.execute(unicode(createconsult))
+
+          cont = 0
+          for row in self.__tablesynset:
+
+            #consult = "DELETE FROM [data_"+str(row[0])+"_word_lex_id] WHERE [synset_offset]='"+str(self.__allsynset_offset[cont])+"' AND [word]='"+self.comboBox_2.currentText()+"'"
+            #print consult
+
+            w_cnt = self.ChangeHex(len(self.__allsynon[cont]))
+            if(len(w_cnt)==1):
+              w_cnt ="0"+w_cnt
+
+            p_cnt = self.cantPointers()
+
+            if(row[0]=="noun"):
+              ss_type = "n"
+            elif(row[0]=="verb"):
+              ss_type = "v"
+            elif(row[0]=="adj"):
+              ss_type = "a"
+            else:
+              ss_type = "r"
+
+            for word in self.__allsynon[cont]:
+              if(str(word[0])==self.comboBox_2.currentText()):
+                 consult = "UPDATE [data_"+str(row[0])+"_word_lex_id] SET [word_traslated]='"+str(row[1])+"'"
+                 print consult
+            if(int(self.__allsynset_offset[cont]) < max):
+              consult = "UPDATE [data_"+str(row[0])+"] SET [ss_type]='"+ss_type+"', [w_cnt]='"+w_cnt+"', [p_cnt]='"+p_cnt+"', [sense]='"+row[2]+"', [sense_es]='"+row[3]+"', [sense_long]='"+row[4]+"', [sense_long_es]='"+row[5]+"', [gloss]='"+row[6]+"', [gloss_es]='"+row[7]+"' WHERE [synset_offset]='"+self.__allsynset_offset[cont]+"'"
+            else:
+              consult = "INSERT OR REPLACE INTO [data_"+str(row[0])+"] VALUES ('"+str(self.__allsynset_offset[cont])+"','00','"+ss_type+"','"+w_cnt+"','"+p_cnt+"','"+row[2]+"','"+row[3]+"','"+row[4]+"','"+row[5]+"','"+row[6]+"','"+row[7]+"')"
+            print consult
+            cont += 1
+        else:
+            print "noooo"
 
 
-    def modifTable(self):
-        """"""
+
+          #if(row[0]=="noun" and pos.find("1 ")==-1):
+          #   pos += "1 "
+          #if(row[0]=="verb" and pos.find("2 ")==-1):
+          #   pos += "2 "
+          #if(row[0]=="adj" and pos.find("3 ")==-1):
+          #   pos += "3 "
+          #if(row[0]=="adv" and pos.find("4 ")==-1):
+          #   pos += "4 "
+
+
+
+
+       # print self.__allsynset_offset
+       # print  self.__tablesynset
+       #self.__connect.commit()
+
+    def modiftable(self):
+
         if(self.__search==True and len(self.lineEdit_4.text())==0):
+               print "1"
                self.__search = False
                item = self.tableWidget.takeItem(self.tableWidget.currentRow(),self.tableWidget.currentColumn())
                self.__tablesynset[self.tableWidget.currentRow()][self.tableWidget.currentColumn()] = str(item.text())
                self.tableWidget.setItem(self.tableWidget.currentRow(),self.tableWidget.currentColumn(),item)
                self.__search = True
+               print self.__search
+
         #print self.__tablesynset
         elif(self.__search==True and len(self.lineEdit_4.text())!=0):
+               print "2"
                self.__search = False
                item = self.tableWidget.takeItem(self.tableWidget.currentRow(),self.tableWidget.currentColumn())
                self.__tablesynset[self.__arrayid[self.tableWidget.currentRow()]][self.tableWidget.currentColumn()] = str(item.text())
@@ -147,14 +269,6 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         columnb = 0
         contword = 0
         cant_row = self.tableWidget.rowCount()
-        #arrayfind = []
-        #pos = 0
-        #print self.__tablesynset[0][0]+"asda"
-        #print self.__columnselected
-        #while(cant_row > pos):
-        #    selectw = self.__tablesynset[pos][self.__columnselected]
-        #    arrayfind.append(selectw)
-        #    pos += 1
         if(cant_row!=-1):
             while(cant_row!=0):
                self.tableWidget.removeRow(cant_row)
@@ -167,7 +281,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
             self.__filter = 1
         else:
             self.__filter = 0
-        #print self.__allwordsynset
+
         if(len(palabra)==0):
          for word in self.__arrayfind:
                 self.tableWidget.insertRow(self.__max_row1)
@@ -213,7 +327,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
                 self.__max_row1 += 1
             columnb = 0
             contword += 1
-         self.__search = True
+        self.__search = True
 
     def elimatrib(self):
           self.__search = False
@@ -269,7 +383,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__allsynon.append(array1)
         self.tableWidget.insertRow(self.__max_row1)
         self.__max_row1 += 1
-        self.__allsynset_offset.append(self.__nummaxdb)
+        self.__allsynset_offset.append(str(self.__nummaxdb))
         self.__nummaxdb += 1
         self.__tablesynset.append(array2)
         self.__search = True
@@ -326,127 +440,151 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
     def insertAtributo(self,cadena):
             self.listWidget.clear()
+            aux = []
             array = []
 
             str = "SELECT DISTINCT([data_noun_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_noun_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
+
                 for w in result:
+                  aux.append("noun")
+                  aux.append(w[0])
                   str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
+
+                  array.append(aux)
+                  aux = []
 
             str = "SELECT DISTINCT([data_verb_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_verb_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","verb")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
+
                 for w in result:
+                  aux.append("verb")
+                  aux.append(w[0])
                   str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
+
+                  array.append(aux)
+                  aux = []
 
             str = "SELECT DISTINCT([data_adj_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adj_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='"+self.comboBox_2.currentText()+"'AND ("+cadena.replace("noun","adj")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
+
                 for w in result:
+                  aux.append("adj")
+                  aux.append(w[0])
                   str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
+
+                  array.append(aux)
+                  aux = []
 
             str = "SELECT DISTINCT([data_adv_ptr].[synset_offset_p]) FROM [index_sense]  INNER JOIN [data_adv_ptr] USING([synset_offset]) WHERE [index_sense].[lemma]='" + self.comboBox_2.currentText() + "'AND ("+cadena.replace("noun","adv")+")"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
             if result:
                 for w in result:
+                  aux.append("adv")
+                  aux.append(w[0])
                   str = "SELECT DISTINCT(word) FROM [data_noun_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_verb_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adj_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
                   str = "SELECT DISTINCT(word) FROM [data_adv_word_lex_id] WHERE [synset_offset]='"+w[0]+"'"
                   self.__cursor.execute(unicode(str))
                   data = self.__cursor.fetchall()
                   if data:
                    for a in data:
-                        array.append(a[0])
+                        aux.append(a[0])
+
+                  array.append(aux)
+
             return array
 
     def insertAtributo1(self,cadena):
@@ -640,8 +778,16 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
     def insertAntonyms(self):
         self.__arrepos = 0
         self.listWidget.clear()
+        print self.__antonyms
         for w in self.__antonyms:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertKindof1(self):
         self.__kindof = self.insertAtributo(self.__difAtrib[9])
@@ -649,9 +795,19 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
     def insertKindof(self):
         self.__arrepos = 8
+
+
         self.listWidget.clear()
         for w in self.__kindof:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
+
 
     def insertKinds1(self):
         self.__kinds = self.insertAtributo(self.__difAtrib[10])
@@ -661,7 +817,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 9
         self.listWidget.clear()
         for w in self.__kinds:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertPartof1(self):
         self.__partof = self.insertAtributo(self.__difAtrib[11])
@@ -671,7 +834,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 10
         self.listWidget.clear()
         for w in self.__partof:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertParts1(self):
         self.__parts = self.insertAtributo(self.__difAtrib[12])
@@ -681,7 +851,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 11
         self.listWidget.clear()
         for w in self.__parts:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertDomain1(self):
         self.__domain = self.insertAtributo(self.__difAtrib[6])
@@ -691,7 +868,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 5
         self.listWidget.clear()
         for w in self.__domain:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertDerivatives1(self):
         self.__derivatives = self.insertAtributo(self.__difAtrib[1])
@@ -701,26 +885,46 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 1
         self.listWidget.clear()
         for w in self.__derivatives:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
-    def insertRelatesto1(self):
-        self.__relatesto = self.insertAtributo(self.__difAtrib[2])
+    def insertAttributes1(self):
+        self.__relatesto = self.insertAtributo(self.__difAtrib[3])
 
     def insertAttributes(self):
         self.__arrepos = 3
         self.listWidget.clear()
         for w in self.__attributes:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
-    def insertAttributes1(self):
-        self.__relatesto = self.insertAtributo(self.__difAtrib[3])
-
+    def insertRelatesto1(self):
+        self.__relatesto = self.insertAtributo(self.__difAtrib[2])
 
     def insertRelatesto(self):
         self.__arrepos = 2
         self.listWidget.clear()
         for w in self.__relatesto:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertSimilar1(self):
         self.__similar = self.insertAtributo(self.__difAtrib[4])
@@ -730,7 +934,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 4
         self.listWidget.clear()
         for w in self.__similar:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertCauses1(self):
         self.__causes = self.insertAtributo(self.__difAtrib[7])
@@ -740,7 +951,14 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 6
         self.listWidget.clear()
         for w in self.__causes:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def insertEntails1(self):
         self.__entails = self.insertAtributo(self.__difAtrib[8])
@@ -750,9 +968,17 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__arrepos = 7
         self.listWidget.clear()
         for w in self.__entails:
-            self.listWidget.addItem(w)
+            str = ""
+            aux = 0
+            for a in w:
+              if(aux > 1):
+               str += a+", "
+              else:
+               aux += 1
+            self.listWidget.addItem(str[0:len(str)-2])
 
     def actualizar1(self):
+        self.__search = False
         cant_row = self.tableWidget.rowCount()
         self.listWidget.clear()
         self.__allsynon = []
@@ -765,6 +991,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
             self.__row1 = 0
             self.__max_row1 = 0
             self.__column1 = 2
+
     def actualizar2(self):
         cant_row = self.tableWidget_2.rowCount()
         if(cant_row!=-0):
@@ -779,8 +1006,6 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
     def insertRow1(self):
 
          self.__allsynset_offset = []
-         self.__allwordsynset = []
-
          aux = []
 
          self.insertAntonyms1()
@@ -798,7 +1023,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
          self.findexc()
 
-         str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"' ORDER BY [ss_type],[sense_number]"
+         str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"' ORDER BY [ss_type],[tag_cnt] DESC, [sense_number]"
          self.__cursor.execute(unicode(str))
          result = self.__cursor.fetchall()
 
@@ -955,6 +1180,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
             self.__row1 += 1
 
          self.insertSynonyms()
+         self.tableWidget.horizontalHeader().setStretchLastSection(True)
          self.__search = True
 
     def findexc(self):
@@ -990,12 +1216,10 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
     def insertRow2(self):
          self.__allsynset_offsetdown = []
-         self.__allwordsynsetdown = []
-
          aux = []
 
 
-         str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"' ORDER BY [ss_type],[sense_number]"
+         str = "SELECT ss_type,synset_offset,sense_number,tag_cnt FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"' ORDER BY [ss_type],[tag_cnt] DESC, [sense_number]"
          self.__cursor.execute(unicode(str))
          result = self.__cursor.fetchall()
 
@@ -1213,6 +1437,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.__filasel.append(self.tableWidget_2.takeItem(self.__row,4))
         self.__filasel.append(self.tableWidget_2.takeItem(self.__row,5))
         self.__filasel.append(self.tableWidget_2.takeItem(self.__row,6))
+        self.__filasel.append(self.tableWidget_2.takeItem(self.__row,7))
 
         self.tableWidget_2.setItem(self.__row,0,QTableWidgetItem(self.__filasel[0]))
         self.tableWidget_2.setItem(self.__row,1,QTableWidgetItem(self.__filasel[1]))
@@ -1221,6 +1446,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.tableWidget_2.setItem(self.__row,4,QTableWidgetItem(self.__filasel[4]))
         self.tableWidget_2.setItem(self.__row,5,QTableWidgetItem(self.__filasel[5]))
         self.tableWidget_2.setItem(self.__row,6,QTableWidgetItem(self.__filasel[6]))
+        self.tableWidget_2.setItem(self.__row,6,QTableWidgetItem(self.__filasel[7]))
         #self.tableWidget_2.insert
 
         #self.actualizar2()
@@ -1241,6 +1467,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         self.tableWidget.setItem(self.__max_row1,4,QTableWidgetItem(self.__filasel[4]))
         self.tableWidget.setItem(self.__max_row1,5,QTableWidgetItem(self.__filasel[5]))
         self.tableWidget.setItem(self.__max_row1,6,QTableWidgetItem(self.__filasel[6]))
+        self.tableWidget.setItem(self.__max_row1,7,QTableWidgetItem(self.__filasel[7]))
         self.__max_row1 += 1
 
         self.__filasel = []
@@ -1256,7 +1483,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
 
 
-            str = "SELECT [synset_offset] FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"' ORDER BY [ss_type],[sense_number]"
+            str = "SELECT [synset_offset] FROM [index_sense] WHERE [lemma]='"+self.comboBox_2.currentText()+"' ORDER BY [ss_type],[tag_cnt] DESC, [sense_number]"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
 
@@ -1323,9 +1550,6 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
         for w in self.__allsynon[self.__rowarray]:
          self.listWidget.addItem(w[0])
 
-        #ss_type = self.tableWidget.takeItem(row,0)
-        #self.tableWidget.setItem(row,0,ss_type)
-        #self.lineEdit_4.setText(self.__allwordsynset[row])
 
     def buscarSynonyms(self):
             self.listWidget_2.clear()
@@ -1397,7 +1621,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
 
     def modrelacion(self):
-        self.pushButton_7.setText("Modificar")
+        self.pushButton_7.setText("Modific")
         self.__rowselection = self.listWidget.currentRow()
         #self.listWidget.
 
@@ -1407,7 +1631,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
 
             welim = self.listWidget.takeItem(self.__rowselection)
             self.listWidget.insertItem(self.__rowselection,self.lineEdit.text())
-            self.pushButton_7.setText("Insertar")
+            self.pushButton_7.setText("Insert")
             if(self.__arrepos==0):
              self.__antonyms.remove(str(welim.text()))
              self.__antonyms.insert(self.__rowselection,self.lineEdit.text())
@@ -1533,7 +1757,7 @@ class WordnetEditor( QMainWindow, Ui_MainWindow):
     def insertSynonyms2(self):
             self.__allsynondown = []
 
-            str = "SELECT [synset_offset] FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"'ORDER BY [ss_type],[sense_number]"
+            str = "SELECT [synset_offset] FROM [index_sense] WHERE [lemma]='"+self.comboBox_3.currentText()+"'ORDER BY [ss_type],[tag_cnt] DESC, [sense_number]"
             self.__cursor.execute(unicode(str))
             result = self.__cursor.fetchall()
 
